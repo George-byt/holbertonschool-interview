@@ -1,135 +1,131 @@
 #include "binary_trees.h"
-#include <stdio.h>
+#define POW2(x) (1 << (x))
+
+heap_t *heap_append(heap_t *root, int value);
+int count_nodes(heap_t *root);
+void index_to_lvl_pos(int index, int *level, int *position);
+void swap(int *a, int *b);
+
 /**
- * heap_insert - creates a binary tree node
- * @root: pointer to the parent node of the node to create.
- * @value: value to put in the new node.
+ * heap_insert - insert value into a Max Binary Heap
+ * @root: a reference of a pointer to the root of the Heap
+ * @value: the value to store in the node to be inserted
  *
- * Return: return a pointer to the new node, or NULL on failure.
+ * Description: If the root is NULL. The created node becoma the root
+ * The program respect the Max Heap
+ * Return: a pointer to inserted node or NULL of failure
  */
 heap_t *heap_insert(heap_t **root, int value)
-{heap_t *new_node, *inserted_node;
-	size_t tree_height, tree_size, expected_nodes, expected_leaves,
-	expected_later_nodes, current_leaves_last_level, removed_root = 0;
+{
+	heap_t *runner = *root;
 
-	new_node = heap_tree_node();
-	if (!new_node)
-		return (NULL);
 	if (*root == NULL)
-	{new_node->n = value;
-		inserted_node = *root = new_node;
-	} else
-	{tree_height = binary_tree_height(*root);
-		tree_size = binary_tree_size(*root);
-		expected_nodes = binary_tree_expected_nodes(tree_height);
-		expected_leaves = _pow_recursion(2, tree_height);
-		if (value > (*root)->n)
-			update_root(root, &new_node, &inserted_node, &value, &removed_root);
-		if (expected_nodes - tree_size == 0)
-		{
-			insert_node(-1, &*root, &new_node, &inserted_node, value, removed_root);
-		} else
-		{expected_later_nodes = binary_tree_expected_nodes(tree_height - 1);
-			current_leaves_last_level = tree_size - expected_later_nodes;
-			if (current_leaves_last_level < (expected_leaves / 2))
-				insert_node(-1, &*root, &new_node, &inserted_node, value, removed_root);
-			else
-				insert_node(1, &*root, &new_node, &inserted_node, value, removed_root);
-		}
-	}
-	return (removed_root ? *root : inserted_node);
-}
-
-/**
- * heap_tree_node - creates a binary tree node
- *
- * Return: return a pointer to the new node, or NULL on failure.
- */
-heap_t *heap_tree_node()
-{
-	heap_t *new_node;
-
-	new_node = malloc(sizeof(heap_t));
-	if (!new_node)
-		return (NULL);
-	new_node->left = new_node->right = new_node->parent = NULL;
-
-	return (new_node);
-}
-
-/**
- * update_root - creates a binary tree node
- * @root: pointer to the parent node of the node to create.
- * @new_node: value to put in the new node.
- * @inserted_node: value to put in the new node.
- * @value: value to put in the new node.
- * @removed_root: value to put in the new node.
- * Return: return a pointer to the new node, or NULL on failure.
- */
-void update_root(heap_t **root, heap_t **new_node, heap_t **inserted_node,
-int *value, size_t *removed_root)
-{
-	heap_t *temp;
-
-	(*new_node)->left = (*root)->left;
-	(*new_node)->right = (*root)->right;
-	(*new_node)->parent = (*root)->parent;
-	if ((*root)->left)
-		(*root)->left->parent = *new_node;
-	if ((*root)->right)
-		(*root)->right->parent = *new_node;
-	(*new_node)->n = *value;
-	*value = (*root)->n;
-	temp = *root;
-	*root = *new_node;
-	*inserted_node = *root;
-	*new_node = temp;
-	(*new_node)->left = NULL;
-	(*new_node)->right = NULL;
-	(*new_node)->parent = NULL;
-	*removed_root = 1;
-}
-
-/**
- * insert_node - creates a binary tree node
- * @direction: pointer to the parent node of the node to create.
- * @root: pointer to the parent node of the node to create.
- * @new_node: value to put in the new node.
- * @inserted_node: value to put in the new node.
- * @value: value to put in the new node.
- * @removed_root: value to put in the new node.
- *
- * Return: return a pointer to the new node, or NULL on failure.
- */
-
-void insert_node(int direction, heap_t **root, heap_t **new_node,
-heap_t **inserted_node, int value, size_t removed_root)
-{
-	if (direction == -1)
 	{
-		if ((*root)->left)
-		{
-			*inserted_node = heap_insert(&(*root)->left, value);
-		} else
-		{
-			(*new_node)->n = value;
-			(*new_node)->parent = *root;
-			(*root)->left = *new_node;
-			if (!removed_root)
-				*inserted_node = *new_node;
-		}
-	} else
-	{
-		if ((*root)->right)
-		{
-			*inserted_node = heap_insert(&(*root)->right, value);
-		} else
-		{
-			(*new_node)->n = value;
-			(*new_node)->parent = *root;
-			(*root)->right = *new_node;
-			if (!removed_root)
-				*inserted_node = *new_node;
-		}
+		*root = binary_tree_node(*root, value);
+		return (*root);
 	}
+
+	runner = heap_append(*root, value);
+
+	while (runner->parent && runner->parent->n < runner->n)
+	{
+		swap(&(runner->n), &(runner->parent->n));
+		runner = runner->parent;
+	}
+
+	return (runner);
+}
+
+/**
+ * heap_append - insert node at the end of the heap (a complete binary tree)
+ * @root: reference to pointer of the root of the binary tree
+ * @value: value of node (int)
+ * Return: a pointer to the new node
+ */
+heap_t *heap_append(heap_t *root, int value)
+{
+	int level, r_pos, size;
+	heap_t *runner = root;
+
+
+	size = count_nodes(runner);
+	index_to_lvl_pos(size, &level, &r_pos);
+	/* printf("counter=%d, level=%d, pos=%d\n", size, level, r_pos); */
+
+	while (level > 1)
+	{
+		if (((r_pos >> (level - 1)) & 1) == 1)
+			runner = runner->right;
+		else
+			runner = runner->left;
+		level--;
+	}
+	if ((r_pos & 1) == 1)
+	{
+		runner->right = binary_tree_node(runner, value);
+		runner = runner->right;
+	}
+	else
+	{
+		runner->left = binary_tree_node(runner, value);
+		runner = runner->left;
+	}
+
+	return (runner);
+}
+
+/**
+ * count_nodes - count number of nodes
+ * @root: pointer to root of tree
+ * Return: number of nodes
+ */
+int count_nodes(heap_t *root)
+{
+
+	if (root == NULL)
+		return (0);
+	return (1 + count_nodes(root->left) + count_nodes(root->right));
+}
+
+/**
+ * index_to_lvl_pos - convert index to level and position in a complete binary
+ * @index: the index in the equivalent array of the heap
+ * @level: an int reference for the level (every level is a new child)
+ * @position: an int reference for the relative position in the level
+ *
+ * Example:
+ *   |         index         Level   position (in the Level)
+ *   |           0             0               0
+ *   |       1       2         1           0       1
+ *   |     3   4   5   6       2         0   1   2   3
+ *   |    7 8 9 A B C D E      3        0 1 2 3 4 5 6 7
+ *
+ * offset = 2^level - 1
+ * level:  0, 1, 2, 3,  4,  5
+ * offset: 0, 1, 3, 7, 15, 32
+ */
+void index_to_lvl_pos(int index, int *level, int *position)
+{
+	int offset;
+
+	*level = 0;
+	while (POW2(*level + 1) - 1 <= index)
+	{
+		(*level)++;
+	}
+
+	offset = (POW2(*level)) - 1;
+	*position = index - offset;
+}
+
+/**
+ * swap - swap 2 variables
+ * @a: a reference to the value
+ * @b: a reference to the value
+ */
+void swap(int *a, int *b)
+{
+	*a = *a ^ *b;
+	*b = *a ^ *b;
+	*a = *a ^ *b;
 }
