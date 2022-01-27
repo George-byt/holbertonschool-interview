@@ -1,44 +1,42 @@
 #!/usr/bin/python3
-"""A script that reads stdin line by line and computes metrics"""
+""" 0. Log parsing
+Write a script that reads stdin line by line and computes metrics
+"""
 
 import sys
-
-
-def print_status(dict, size):
-    """Print the format"""
-    print("File size: {}".format(size))
-    for key in sorted(dict.keys()):
-        if dict[key] != 0:
-            print("{}: {}".format(key, dict[key]))
-
-
-status_dict = {'200': 0, '301': 0, '400': 0, '401': 0, '403': 0,
-               '404': 0, '405': 0, '500': 0}
+import signal
 
 file_size = 0
-count = 0
-
-try:
-    for line in sys.stdin:
-        if count != 0 and count % 10 == 0:
-            print_status(status_dict, file_size)
-
-        el = line.split(" ")
-        count += 1
-
-        try:
-            file_size += int(el[-1])
-        except:
-            pass
-
-        try:
-            if el[-2] in status_dict.keys():
-                status_dict[el[-2]] += 1
-        except:
-            pass
-    print_status(status_dict, file_size)
+http_status = {}
+codes_status = ["200", "301", "400", "401", "403", "404", "405", "500"]
 
 
-except KeyboardInterrupt:
-    print_status(status_dict, file_size)
-    raise
+def print_logs_formated(file_size, http_status):
+    """print_logs_formated"""
+
+    print("File size: {}".format(file_size))
+    for key in sorted(http_status):
+        print("{}: {}".format(key, http_status[key]))
+
+
+def signal_handler(sig, frame):
+    """signal_handler"""
+
+    print_logs_formated(file_size, http_status)
+
+
+for index, line in enumerate(sys.stdin, 1):
+    if line != "":
+        reverted_splitted_line = line.rstrip().split(" ")
+        if len(reverted_splitted_line) >= 2:
+            reverted_splitted_line.reverse()
+            file_size += int(reverted_splitted_line[0])
+            if reverted_splitted_line[1] in codes_status:
+                http_status.setdefault(int(reverted_splitted_line[1]), 0)
+                http_status[int(reverted_splitted_line[1])] += 1
+
+        if index % 10 == 0:
+            print_logs_formated(file_size, http_status)
+
+        signal.signal(signal.SIGINT, signal_handler)
+print_logs_formated(file_size, http_status)
