@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-""" UTF-8 Validation """
-from typing import List
+""" Python file that contains UTF-8 Validation """
 
 
 def EightBits(integer):
