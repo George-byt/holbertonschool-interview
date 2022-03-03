@@ -6,28 +6,28 @@
  */
 void menger(int level)
 {
-  char *sponge;
-  int l;
+char *sponge;
+int l;
 
-  if (level < 0)
-    return;
-  if (level == 0)
-    {
-      printf("#\n");
-      return;
-    }
-  sponge = malloc(sizeof(char) * 3);
-  sponge[0] = '#';
-  sponge[1] = '\n';
-  sponge[2] = '\0';
-  l = 0;
-  while (l < level)
-    {
-      l++;
-      sponge = level_up(sponge, l);
-    }
-  printf("%s", sponge);
-  free(sponge);
+if (level < 0)
+return;
+if (level == 0)
+{
+printf("#\n");
+return;
+}
+sponge = malloc(sizeof(char) * 3);
+sponge[0] = '#';
+sponge[1] = '\n';
+sponge[2] = '\0';
+l = 0;
+while (l < level)
+{
+l++;
+sponge = level_up(sponge, l);
+}
+printf("%s", sponge);
+free(sponge);
 }
 
 /**
@@ -38,10 +38,10 @@ void menger(int level)
  */
 char *level_up(char *sponge, int level)
 {
-  double size;
+double size;
 
-  size = pow((double)3, (double)level);
-  return (build_sponge(sponge, (int)size));
+size = pow((double)3, (double)level);
+return (build_sponge(sponge, (int)size));
 }
 
 /**
@@ -54,42 +54,42 @@ char *level_up(char *sponge, int level)
  */
 char *build_sponge(char *sponge, int size)
 {
-  int len, c, times;
-  char *border, *center, *p_copy, *line;
+int len, c, times;
+char *border, *center, *p_copy, *line;
 
-  len = (size + 1) * (size / 3) + 1;
-  border = malloc(sizeof(char) * len);
-  center = malloc(sizeof(char) * len);
-  p_copy = strdup((const char *)sponge);
-  line = strtok(p_copy, "\n");
-  c = 0;
-  for (times = 0; times < 3; times++)
-    {
-      c = build_border_center(border, center, c, line, times);
-    }
-  center[c] = '\n';
-  border[c] = '\n';
-  c++;
-  line = strtok(NULL, "\n");
-  while (line)
-    {
-      for (times = 0; times < 3; times++)
-	{
-	  c = build_border_center(border, center, c, line, times);
-	}
-      center[c] = '\n';
-      border[c] = '\n';
-      c++;
-      line = strtok(NULL, "\n");
-    }
-  center[c] = '\0';
-  border[c] = '\0';
-  free(p_copy);
-  free(sponge);
-  sponge = concatenate(border, center, size);
-  free(border);
-  free(center);
-  return (sponge);
+len = (size + 1) * (size / 3) + 1;
+border = malloc(sizeof(char) * len);
+center = malloc(sizeof(char) * len);
+p_copy = strdup((const char *)sponge);
+line = strtok(p_copy, "\n");
+c = 0;
+for (times = 0; times < 3; times++)
+{
+c = build_border_center(border, center, c, line, times);
+}
+center[c] = '\n';
+border[c] = '\n';
+c++;
+line = strtok(NULL, "\n");
+while (line)
+{
+for (times = 0; times < 3; times++)
+{
+c = build_border_center(border, center, c, line, times);
+}
+center[c] = '\n';
+border[c] = '\n';
+c++;
+line = strtok(NULL, "\n");
+}
+center[c] = '\0';
+border[c] = '\0';
+free(p_copy);
+free(sponge);
+sponge = concatenate(border, center, size);
+free(border);
+free(center);
+return (sponge);
 }
 
 /**
@@ -103,24 +103,24 @@ char *build_sponge(char *sponge, int size)
  */
 int build_border_center(char *border, char *center, int c, char *line, int t)
 {
-  int i;
+int i;
 
-  i = 0;
-  while (line[i])
-    {
-      if (t != 1)
-	{
-	  center[c] = line[i];
-	}
-      else
-	{
-	  center[c] = ' ';
-	}
-      border[c] = line[i];
-      i++;
-      c++;
-    }
-  return (c);
+i = 0;
+while (line[i])
+{
+if (t != 1)
+{
+center[c] = line[i];
+}
+else
+{
+center[c] = ' ';
+}
+border[c] = line[i];
+i++;
+c++;
+}
+return (c);
 }
 
 /**
@@ -134,27 +134,27 @@ int build_border_center(char *border, char *center, int c, char *line, int t)
  */
 char *concatenate(char *border, char *center, int size)
 {
-  char *sponge;
-  int len, i, c;
+char *sponge;
+int len, i, c;
 
-  len = ((size + 1) * size) + 1;
-  sponge = malloc(sizeof(char) * len);
-  c = 0;
-  for (i = 0; border[i]; i++)
-    {
-      sponge[c] = border[i];
-      c++;
-    }
-  for (i = 0; center[i]; i++)
-    {
-      sponge[c] = center[i];
-      c++;
-    }
-  for (i = 0; border[i]; i++)
-    {
-      sponge[c] = border[i];
-      c++;
-    }
-  sponge[c] = '\0';
-  return (sponge);
+len = ((size + 1) * size)+1;
+sponge = malloc(sizeof(char) * len);
+c = 0;
+for (i = 0; border[i]; i++)
+{
+sponge[c] = border[i];
+c++;
+}
+for (i = 0; center[i]; i++)
+{
+sponge[c] = center[i];
+c++;
+}
+for (i = 0; border[i]; i++)
+{
+sponge[c] = border[i];
+c++;
+}
+sponge[c] = '\0';
+return (sponge);
 }
