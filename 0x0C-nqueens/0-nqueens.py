@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     try:
         n = int(sys.argv[1])
-    except:
+    except Exception:
         print("N must be a number")
         exit(1)
     queens(n)
